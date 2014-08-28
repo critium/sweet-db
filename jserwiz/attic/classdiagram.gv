@@ -1,0 +1,19 @@
+digraph models_diagram {
+  graph[overlap=false, splines=true]
+    "User" [shape=record, label=<<table border="0" cellborder="0" cellpadding="3" bgcolor="white"><tr><td bgcolor="black" align="center" colspan="2"><font color="white">State #0</font></td></tr><tr><td align="left" port="r0">&#40;0&#41; s -&gt; &bull;e $ </td></tr><tr><td align="left" port="r1">&#40;1&#41; e -&gt; &bull;l '=' r </td></tr><tr><td align="left" port="r2">&#40;2&#41; e -&gt; &bull;r </td></tr><tr><td align="left" port="r3">&#40;3&#41; l -&gt; &bull;'*' r </td></tr><tr><td align="left" port="r4">&#40;4&#41; l -&gt; &bull;'n' </td></tr><tr><td align="left" port="r5">&#40;5&#41; r -&gt; &bull;l </td></tr></table>>]
+    "Venue" [shape=Mrecord, label=<
+      <table border="0" cellborder="0" cellpadding="3">
+        <tr><td bgcolor="blue"><font color="white">Venue</font></td></tr>
+        <hr/>
+        <tr><td>name :<font color="gray">integer</font></td></tr>
+      </table>
+    >]
+    "Order" [shape=Mrecord, label="{Order|id:integer\luser_id:integer\lname:string\l}"]
+    struct1 [shape=box, style=rounded label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+    <TR><TD>left</TD><TD PORT="f1">mid dle</TD><TD PORT="f2">right</TD></TR>
+    </TABLE>>];
+
+    "User" -> "Order" [arrowtail=odot, arrowhead=crow, dir=both, label="request"]
+    "User" -> "Venue" [arrowtail=odot, arrowhead=crow, dir=both, label=agent]
+}

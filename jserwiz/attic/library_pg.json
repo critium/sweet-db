@@ -1,0 +1,69 @@
+{
+  "abstract columns":{
+    "id"         :{"type":"integer"         ,"nullable":"false"  ,"key":"true",  "autoinc":"sequence" },
+    "name"       :{"type":"varchar(64)"     ,"nullable":"true"  },
+    "description":{"type":"varchar(256)"    ,"nullable":"true"  },
+    "*_hstore"   :{"type":"hstore"          ,"nullable":"true"  },
+    "*_json"     :{"type":"json"            ,"nullable":"true"  },
+    "*_ts"       :{"type":"timestamp"       ,"nullable":"true"  },
+    "*_tx"       :{"type":"varchar(64)"     ,"nullable":"true"  },
+    "*_long"     :{"type":"bigint"          ,"nullable":"false" },
+    "*_dbl"      :{"type":"double precision","nullable":"false" },
+    "*_int"      :{"type":"integer"         ,"nullable":"false" },
+    "*_type"     :{"type":"varchar(64)"     ,"nullable":"false" },
+    "*_id"       :{"type":"integer"         ,"nullable":"false" },
+    "*"          :{"type":"varchar(64)"     ,"nullable":"true"  },
+    "comment":"We handle *type and *id by default.  These are overrides"
+  },
+  "abstract FK":{
+    "*_id":"*.id",
+    "*_type":"*.id"
+  },
+  "abstract tables":{
+    "table_name":{
+      "id"                   : {},
+      "name"                 : {},
+      "description"          : {},
+      "[table_name]_id"        : {},
+      "parent_[table_name]_id" : {}
+    },
+    "id_name_desc":[
+      "id",
+      "name",
+      "description"
+    ],
+    "person":[
+      "id","first_name","last_name"
+    ]
+  },
+
+  "styles":{
+    "style_name":{
+      "table":{
+        "bgColor":"#fff",
+        "font":"arial"
+      },
+      "header":{
+        "font":"arial",
+        "fontColor":"#fff",
+        "bcColor":"#fff"
+      },
+      "apply":["table1", "table_name", "table_type"]
+    }
+  },
+
+  "tables":{
+    "book extends id_name_desc":[
+      "author_id",
+      "genre_type"
+    ],
+    "author extends person":[],
+    "genre_type extends id_name_desc":{
+      "id" : {"type":"varchar(64)"}
+    },
+    "borrower extends person":[],
+    "copies":[
+      "id","book_id","borrower_id","due_dt","borrow_dt"
+    ]
+  }
+}
