@@ -1,0 +1,5 @@
+{
+  "tables":{
+    "table":["id", "name", "description", "ts"]
+  }
+}

@@ -1,0 +1,9 @@
+ROADMAP:
+1. Command Line Schema Creation in jS
+1. Change loggers
+2. Migration of Schemas
+2. Migrate JS to CLJS or ScalaJS
+3. Create node-webkit/atom-shell tool
+3. Migration of Data
+4. Create DB Tool
+4. Sandbox/Dev/QA/Prod aware

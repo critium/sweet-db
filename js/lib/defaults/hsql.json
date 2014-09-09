@@ -1,0 +1,46 @@
+{
+  "abstract columns":{
+    "id"         :{"type":"integer"         ,"nullable":"false"  ,"key":"true",  "autoinc":"sequence" },
+    "name"       :{"type":"varchar(64)"     ,"nullable":"true"  },
+    "description":{"type":"varchar(256)"    ,"nullable":"true"  },
+    "*_hstore"   :{"type":"hstore"          ,"nullable":"true"  },
+    "*_json"     :{"type":"json"            ,"nullable":"true"  },
+    "*_ts"       :{"type":"timestamp"       ,"nullable":"true"  },
+    "*_tx"       :{"type":"varchar(64)"     ,"nullable":"true"  },
+    "*_long"     :{"type":"bigint"          ,"nullable":"false" },
+    "*_dbl"      :{"type":"double precision","nullable":"false" },
+    "*_int"      :{"type":"integer"         ,"nullable":"false" },
+    "*_type"     :{"type":"varchar(64)"     ,"nullable":"false" },
+    "*_id"       :{"type":"integer"         ,"nullable":"false" },
+    "*"          :{"type":"varchar(64)"     ,"nullable":"true"  },
+    "comment":"We handle *type and *id by default.  These are overrides"
+  },
+  "abstract FK":{
+    "*_id":"*.id",
+    "*_type":"*.type"
+  },
+  "abstract tables":{
+    "table_name":{
+      "id"                   : {},
+      "name"                 : {},
+      "description"          : {},
+      "[table_name]_id"        : {},
+      "parent_[table_name]_id" : {}
+    }
+  },
+
+  "styles":{
+    "style_name":{
+      "table":{
+        "bgColor":"#fff",
+        "font":"arial"
+      },
+      "header":{
+        "font":"arial",
+        "fontColor":"#fff",
+        "bcColor":"#fff"
+      },
+      "apply":["table1", "table_name", "table_type"]
+    }
+  }
+}

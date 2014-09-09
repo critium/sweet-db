@@ -1,0 +1,45 @@
+#!/usr/bin/env node
+
+var program   = require('commander');
+var sdb       = require("../lib/sdb")
+var ddl       = require('../lib/ddl');
+var sDDL      = require('../lib/sddlparser')
+var pgDef     = require('../lib/defaults/pg.json')
+var mysqlDef  = require('../lib/defaults/mysql.json')
+var hsqlDef   = require('../lib/defaults/hsql.json')
+var oracleDef = require('../lib/defaults/oracle.json')
+var _         = require('lodash');
+
+
+program
+  .version('0.1.0')
+  .option('--dbType <db>', 'the type of db <pg,mysql,hsql,oracle>')
+  .option('--file <file>', 'open the file')
+  .option('--ddl', 'create the ddl')
+  .parse(process.argv);
+
+
+var validDBs = { 'pg':pgDef, 'mysql':mysqlDef, 'hsql':hsqlDef, 'oracle':oracleDef }
+
+if(program.dbType && _.contains(Object.keys(validDBs), program.dbType)) {
+  var rootSDDLFile = validDBs[program.dbType]
+
+  // validate the file
+  if(program.file) {
+    var sDDLFile = sDDL.merge(
+      rootSDDLFile,
+      sDDL.read(program.file)
+    )
+
+    if (program.ddl) {
+      ddl.create(rootSDDLFile, sDDLFile)
+    };
+  };
+} else {
+  console.log("Could not find valid db type. SHould be one of the following: " +
+              JSON.stringify(Object.keys(validDBs)));
+};
+
+
+
+
