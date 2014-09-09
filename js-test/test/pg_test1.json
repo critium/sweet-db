@@ -1,5 +1,5 @@
 {
   "tables":{
-    "table":["id", "name", "description", "ts"]
+    "table":["id", "name", "description"]
   }
 }

@@ -1,6 +1,7 @@
 "use strict"
 
 var fs = require('fs');
+var _  = require('lodash');
 
 this.read = function read(file) {
   var result = fs.readFileSync(file, 'utf8');
@@ -31,7 +32,9 @@ var STATIC = {
     abstrct:{
       key:"abstract"
     },
-    columns:{},
+    columns:{
+      key:"columns"
+    },
     FK:{},
     tables:{
       key:"tables"
@@ -41,7 +44,11 @@ var STATIC = {
     },
     styles:{},
     header:{},
-    style_name:{}
+    style_name:{},
+    type:{},
+    nullable:{},
+    key:{},
+    autoinc:{}
   }
 };
 
@@ -59,22 +66,51 @@ var merge = function merge(rootDefs, custDefs) {
       return mergeColumns(mergedTable, rootDefs.columns)
     } else {
 
-      return mergeColumns(item);
+      return mergeColumns(item, rootDefs.columns);
     }
   });
 
-  // names collide with abstract columns?
+  console.log("MERGE", mergedTables);
 
 };
 
 var mergeColumns = function mergeColumns(mergedTable, rootColumns) {
+  var result = _.mapValues(mergedTable, function(cols){
+    if(_.isArray(cols)){
+      var colsInArray = _.map(cols, function(col){
+        var match = rootColumns[col]
+        if(match) {
+          var result = {};
+          result[col] = match;
+          return result;
+        } else {
+          //throw { msg: 'could not find abstract column', val:col }
+        }
+      });
+      // convert [{}] to {}
+      var result = {};
+      colsInArray.forEach(function(col){
+        var colKeys = Object.keys(col);
+        colKeys.forEach(function(key){
+          result[key] = col[key];
+        });
+      });
+      return result;
+    } else if(_.isPlainObject(cols)){
+    } else {
+      throw {msg:"invalid format", val:mergedTable}
+    }
+
+  });
+  console.log("MC", result);
+  return result;
 };
 
 var getExtendedTable = function (item, rootDefs) {
   var tableName = item.table;
   var extendsIdx = item.indexOf(STATIC.KEYWORDS.extnds.key) + STATIC.KEYWORDS.extnds.key.length
   var abstractTableName = item.substring(extendsIdx).trim()
-  return rootDefs.abstrct.tables[abstractTableName]
+  return rootDefs.tables[abstractTableName]
 };
 
 var mergeTables = function mergeTables(tableItem, rootTableItem){
@@ -100,22 +136,29 @@ var parseRoot = function parseRoot(rootJSON) {
   // get all the keys, parse them and sort them
   var rootKeys = Object.keys(rootJSON);
   var tables = [];
+  var columns = {};
 
   rootKeys.forEach(function(item){
     if(hasAbstract(item) && hasTables(item)) {
       tables.push(rootJSON[item])
     }
+    if(hasAbstract(item) && hasColumns(item)) {
+      columns = rootJSON[item]
+    }
   });
 
   return {
-    abstrct:{
-      tables:tables
-    }
+    tables:tables,
+    columns:columns
   }
 };
 
+var hasColumns = function hasColumns(item) {
+  return hasKey(item, STATIC.KEYWORDS.columns.key);
+}
+
 var hasExtends = function hasExtends(item) {
-  return hasKey(item, STATIC.KEYWORDS.extnds.key)
+  return hasKey(item, STATIC.KEYWORDS.extnds.key);
 };
 
 var hasTables = function hasTables(item) {

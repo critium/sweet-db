@@ -24,7 +24,6 @@
       "id"                   : {},
       "name"                 : {},
       "description"          : {},
-      "[table_name]_id"        : {},
       "parent_[table_name]_id" : {}
     }
   },
