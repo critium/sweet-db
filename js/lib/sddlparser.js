@@ -45,10 +45,18 @@ var STATIC = {
     styles:{},
     header:{},
     style_name:{},
-    type:{},
-    nullable:{},
-    key:{},
-    autoinc:{}
+    type:{
+      key:"type"
+    },
+    nullable:{
+      key:"nullable"
+    },
+    key:{
+      key:"key"
+    },
+    autoinc:{
+      key:"autoinc"
+    }
   }
 };
 
@@ -56,17 +64,17 @@ var merge = function merge(rootDefs, custDefs) {
   var tables = custDefs.tables;
 
   // does it extend anything?
-  var mergedTables = tables.map(function(item){
-    if(hasExtends(item.table)){
+  var mergedTables = _.map(tables, function(item, key){
+    if(hasExtends(key)){
       // grab the table from the abstract table and merge them
-      var superTbl = getExtendedTable(item, rootDefs)
+      var superTbl = getExtendedTable(key, rootDefs)
       // not testing this yet...
       var mergedTable = mergeTables(item, superTbl);
 
       return mergeColumns(mergedTable, rootDefs.columns)
     } else {
 
-      return mergeColumns(item, rootDefs.columns);
+      return mergeColumns(key, item, rootDefs.columns);
     }
   });
 
@@ -74,42 +82,61 @@ var merge = function merge(rootDefs, custDefs) {
 
 };
 
-var mergeColumns = function mergeColumns(mergedTable, rootColumns) {
-  var result = _.mapValues(mergedTable, function(cols){
-    if(_.isArray(cols)){
-      var colsInArray = _.map(cols, function(col){
-        var match = rootColumns[col]
-        if(match) {
-          var result = {};
-          result[col] = match;
-          return result;
-        } else {
-          //throw { msg: 'could not find abstract column', val:col }
-        }
-      });
-      // convert [{}] to {}
-      var result = {};
-      colsInArray.forEach(function(col){
-        var colKeys = Object.keys(col);
-        colKeys.forEach(function(key){
-          result[key] = col[key];
-        });
-      });
-      return result;
-    } else if(_.isPlainObject(cols)){
-    } else {
-      throw {msg:"invalid format", val:mergedTable}
-    }
+var mergeColumns = function mergeColumns(key, cols, rootColumns) {
+  var result = {};
 
-  });
-  console.log("MC", result);
+  if(_.isArray(cols)){
+    // find matches on the abstract columns
+    var colsInArray = _.map(cols, function(col){
+      var match = rootColumns[col]
+      if(match) {
+        result[col] = match;
+      } else {
+        //throw { msg: 'could not find abstract column', val:col }
+      }
+    });
+
+  } else if(_.isPlainObject(cols)){
+    var colsInMap = _.map(cols, function(colVal, colKey){
+      var rootCol = rootColumns[colKey];
+      if(rootCol) {
+        result[colKey] = mergeColumn(colVal, rootCol)
+      } else {
+        result[colKey] = colVal;
+      }
+    });
+
+  } else {
+    throw {msg:"invalid format", val:mergedTable}
+  }
+
   return result;
 };
 
-var getExtendedTable = function (item, rootDefs) {
-  var tableName = item.table;
-  var extendsIdx = item.indexOf(STATIC.KEYWORDS.extnds.key) + STATIC.KEYWORDS.extnds.key.length
-  var abstractTableName = item.substring(extendsIdx).trim()
+var mergeColumn = function mergeColumn(colVal, rootCol) {
+  var result = {}
+  mergeKey(result, STATIC.KEYWORDS.type.key, colVal, rootCol)
+  mergeKey(result, STATIC.KEYWORDS.nullable.key, colVal, rootCol)
+  mergeKey(result, STATIC.KEYWORDS.key.key, colVal, rootCol)
+  mergeKey(result, STATIC.KEYWORDS.autoinc.key, colVal, rootCol)
+  return result;
+};
+
+var mergeKey = function mergeKey(common, key, lObj, rObj) {
+  var lItem = lObj[key];
+  if(lItem) {
+    common[key] = lItem;
+  } else {
+    var rItem = rObj[key];
+    if(rItem) {
+      common[key] = rItem;
+    }
+  }
+};
+
+var getExtendedTable = function getExtendedTable(tableName, rootDefs) {
+  var extendsIdx = key.indexOf(STATIC.KEYWORDS.extnds.key) + STATIC.KEYWORDS.extnds.key.length
+  var abstractTableName = key.substring(extendsIdx).trim()
   return rootDefs.tables[abstractTableName]
 };
 
@@ -119,17 +146,15 @@ var mergeTables = function mergeTables(tableItem, rootTableItem){
 
 var parseCust = function parseCust(custJSON) {
   var custKeys = Object.keys(custJSON);
-  var tables = [];
+  var tables = {};
 
   custKeys.forEach(function(item){
     if(hasTables(item)) {
-      tables.push(custJSON[item])
+      tables[item] = custJSON[item];
     }
   });
 
-  return {
-    tables:tables
-  };
+  return tables;
 };
 
 var parseRoot = function parseRoot(rootJSON) {

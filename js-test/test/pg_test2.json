@@ -1,0 +1,10 @@
+{
+  "tables":{
+    "table":{
+      "id":{"type":"varchar(64)"},
+      "name":{"nullable":"true"},
+      "description":{},
+      "ts":{"type":"timestamp", "nullable":"true"}
+    }
+  }
+}
