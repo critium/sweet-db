@@ -20,9 +20,10 @@
   "dependencies": {
     "commander": "2.3.X",
     "lodash": "2.4.X"
-
   },
-  "devDependencies": { },
+  "devDependencies": {
+    "mocha":"1.21.X"
+  },
   "preferGlobal": true,
   "private": false,
   "publishConfig": { },

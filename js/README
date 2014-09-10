@@ -1,0 +1,1 @@
+./bin/sweet --ddl --file "test/pg_test1.json" --dbType pg

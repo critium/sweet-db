@@ -5,12 +5,15 @@ Release 1 (command line only release, ddl and pdf/png creation for docu):
 			- Columns array @done(2014-09-09)
 			- Columns object @done(2014-09-09)
 			- overrides on columns @done(2014-09-09)
-			- Regex columns
+			- Regex columns array fmt @today
+			- Regex columns object fmt
+			- Regex columns object fmt with override
 			- defaults (*)
 		- Tables extends modifying customer
 			- Extends adding columns
 		- FKs
-			- FK Overrides
+			- FK local overrides
+			- FK defaults
 		- Basic Tests on JSON Only
 			- Composite keys
 			- 2 tables

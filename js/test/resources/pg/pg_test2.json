@@ -2,7 +2,7 @@
   "tables":{
     "table":{
       "id":{"type":"varchar(64)"},
-      "name":{"nullable":"true"},
+      "name":{"nullable":"false"},
       "description":{},
       "ts":{"type":"timestamp", "nullable":"true"}
     }

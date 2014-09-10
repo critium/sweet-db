@@ -1,7 +1,8 @@
 "use strict"
 
-var fs = require('fs');
-var _  = require('lodash');
+var fs     = require('fs');
+var _      = require('lodash');
+var patch  = require('../lib/patch').patch();
 
 this.read = function read(file) {
   var result = fs.readFileSync(file, 'utf8');
@@ -9,59 +10,40 @@ this.read = function read(file) {
 };
 
 this.merge = function(rootJSON, custJSON) {
-  var tables = {};
-
   // get all abstract tables
   var rootDefs = parseRoot(rootJSON);
 
   // get all customer tables
   var custDefs = parseCust(custJSON);
 
-
-  console.log("RD", rootDefs)
-  console.log("CD", custDefs)
-
   // merge
   var mergedDefs = merge(rootDefs, custDefs);
 
+  return mergedDefs;
 };
 
 // INTERNAL STUFF //
 var STATIC = {
   KEYWORDS:{
-    abstrct:{
-      key:"abstract"
-    },
-    columns:{
-      key:"columns"
-    },
-    FK:{},
-    tables:{
-      key:"tables"
-    },
-    extnds:{
-      key:"extends"
-    },
-    styles:{},
-    header:{},
-    style_name:{},
-    type:{
-      key:"type"
-    },
-    nullable:{
-      key:"nullable"
-    },
-    key:{
-      key:"key"
-    },
-    autoinc:{
-      key:"autoinc"
-    }
+    abstrct    : { key : "abstract" },
+    columns    : { key : "columns" },
+    FK         : {},
+    tables     : { key : "tables" },
+    extnds     : { key : "extends" },
+    styles     : {},
+    header     : {},
+    style_name : {},
+    type       : { key : "type" },
+    nullable   : { key : "nullable" },
+    key        : { key : "key" },
+    autoinc    : { key : "autoinc" },
+    glob       : { key : "*" }
   }
 };
 
 var merge = function merge(rootDefs, custDefs) {
   var tables = custDefs.tables;
+  var result = {};
 
   // does it extend anything?
   var mergedTables = _.map(tables, function(item, key){
@@ -73,26 +55,48 @@ var merge = function merge(rootDefs, custDefs) {
 
       return mergeColumns(mergedTable, rootDefs.columns)
     } else {
-
-      return mergeColumns(key, item, rootDefs.columns);
+      return result[key] = mergeColumns(key, item, rootDefs.columns);
     }
   });
 
-  console.log("MERGE", mergedTables);
+  console.log("MERGE", result);
+
+  return result;
 
 };
 
 var mergeColumns = function mergeColumns(key, cols, rootColumns) {
   var result = {};
+  var globbedRootCols = getGlobbed(rootColumns);
 
   if(_.isArray(cols)){
     // find matches on the abstract columns
     var colsInArray = _.map(cols, function(col){
       var match = rootColumns[col]
-      if(match) {
+      if(match) { // matched 1 to 1 on the key
         result[col] = match;
-      } else {
-        //throw { msg: 'could not find abstract column', val:col }
+
+      } else { // checks the globs
+        // for each glob, endsWith
+        var globbedKeys = _.keys(globbedRootCols);
+        var globMatch = _.reduce(globbedKeys, function(bool,rawGlobbedKey){
+          if(bool) {
+            return bool;
+          } else {
+            var globbedKey = cleanupGlob(rawGlobbedKey);
+            if(globbedKey.trim().length > 0 && col.endsWith(globbedKey)){
+              var globbedValue = rootColumns[rawGlobbedKey];
+              result[col] = globbedValue;
+              return true;
+            } else {
+              return false;
+            }
+          }
+        }, false);
+
+        if(!globMatch) { // no other match found, check for default
+          result[col] = rootColumns[STATIC.KEYWORDS.glob.key]
+        }
       }
     });
 
@@ -109,6 +113,23 @@ var mergeColumns = function mergeColumns(key, cols, rootColumns) {
   } else {
     throw {msg:"invalid format", val:mergedTable}
   }
+
+  return result;
+};
+
+var cleanupGlob = function cleanupGlob(globbedCol){
+  return globbedCol.substring(1,globbedCol.length);
+};
+
+var getGlobbed = function getGlobbed(rootColumns) {
+  var globbedKeys = _.remove(_.keys(rootColumns), function(key){
+    return key.startsWith(STATIC.KEYWORDS.glob.key)
+  });
+
+  var result = {};
+  globbedKeys.forEach(function(globbedKey){
+    result[globbedKey] = rootColumns[globbedKey]
+  });
 
   return result;
 };

@@ -1,0 +1,16 @@
+{
+  "tables":{
+    "table":[
+      "test_hstore",
+      "test_json",
+      "test_ts",
+      "test_tx",
+      "test_long",
+      "test_dbl",
+      "test_int",
+      "test_type",
+      "test_id",
+      "default"
+    ]
+  }
+}
