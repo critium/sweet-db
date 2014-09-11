@@ -1,0 +1,16 @@
+{
+  "tables":{
+    "table":{
+      "test_hstore" : {"nullable":"false"},
+      "test_json"   : {"nullable":"false"},
+      "test_ts"     : {"nullable":"false"},
+      "test_tx"     : {"nullable":"false"},
+      "test_long"   : {"nullable":"false"},
+      "test_dbl"    : {"nullable":"true"},
+      "test_int"    : {"nullable":"true"},
+      "test_type"   : {"nullable":"true"},
+      "test_id"     : {"nullable":"true"},
+      "default"     : {"nullable":"false"}
+    }
+  }
+}

@@ -13,19 +13,23 @@
     "*_type"     :{"type":"varchar(64)"     ,"nullable":"false" },
     "*_id"       :{"type":"integer"         ,"nullable":"false" },
     "*"          :{"type":"varchar(64)"     ,"nullable":"true"  },
-    "comment":"We handle *type and *id by default.  These are overrides"
+    "comment":"We handle *_type and *_id by default.  These are overrides"
   },
   "abstract FK":{
     "*_id":"*.id",
     "*_type":"*.type"
   },
   "abstract tables":{
-    "table_name":{
-      "id"                   : {},
-      "name"                 : {},
-      "description"          : {},
-      "parent_[table_name]_id" : {}
+    "synthetic_key":{
+      "id"          : {},
+      "name"        : {},
+      "description" : {}
+    },
+    "enum":{
+      "id"          : {"type" : "varchar(64)","nullable" : "false", "autoinc":"false" },
+      "description" : {}
     }
+
   },
 
   "styles":{

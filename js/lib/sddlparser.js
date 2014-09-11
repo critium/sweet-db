@@ -51,9 +51,10 @@ var merge = function merge(rootDefs, custDefs) {
       // grab the table from the abstract table and merge them
       var superTbl = getExtendedTable(key, rootDefs)
       // not testing this yet...
-      var mergedTable = mergeTables(item, superTbl);
+      var mergedTable = mergeTables(item, superTbl.abstractName);
 
-      return mergeColumns(mergedTable, rootDefs.columns)
+      return result[superTbl.rootName] = mergeColumns(key, mergedTable, rootDefs.columns);
+
     } else {
       return result[key] = mergeColumns(key, item, rootDefs.columns);
     }
@@ -66,8 +67,12 @@ var merge = function merge(rootDefs, custDefs) {
 };
 
 var mergeColumns = function mergeColumns(key, cols, rootColumns) {
+  console.log("MC-Start", key, cols, rootColumns);
   var result = {};
-  var globbedRootCols = getGlobbed(rootColumns);
+  var globMatchFunc = globMatchFactory (
+    _.keys(getGlobbed(rootColumns)),
+    rootColumns
+  );
 
   if(_.isArray(cols)){
     // find matches on the abstract columns
@@ -78,23 +83,11 @@ var mergeColumns = function mergeColumns(key, cols, rootColumns) {
 
       } else { // checks the globs
         // for each glob, endsWith
-        var globbedKeys = _.keys(globbedRootCols);
-        var globMatch = _.reduce(globbedKeys, function(bool,rawGlobbedKey){
-          if(bool) {
-            return bool;
-          } else {
-            var globbedKey = cleanupGlob(rawGlobbedKey);
-            if(globbedKey.trim().length > 0 && col.endsWith(globbedKey)){
-              var globbedValue = rootColumns[rawGlobbedKey];
-              result[col] = globbedValue;
-              return true;
-            } else {
-              return false;
-            }
-          }
-        }, false);
+        var globMatch = globMatchFunc(col)
 
-        if(!globMatch) { // no other match found, check for default
+        if(globMatch) {
+          result[col] = globMatch;
+        } else { // no other match found, check for default
           result[col] = rootColumns[STATIC.KEYWORDS.glob.key]
         }
       }
@@ -106,7 +99,12 @@ var mergeColumns = function mergeColumns(key, cols, rootColumns) {
       if(rootCol) {
         result[colKey] = mergeColumn(colVal, rootCol)
       } else {
-        result[colKey] = colVal;
+        var globMatch = globMatchFunc(colKey)
+        if(globMatch){
+          result[colKey] = mergeColumn(colVal, globMatch);
+        } else {
+          result[colKey] = mergeColumn(colVal,rootColumns[STATIC.KEYWORDS.glob.key]);
+        }
       }
     });
 
@@ -116,6 +114,24 @@ var mergeColumns = function mergeColumns(key, cols, rootColumns) {
 
   return result;
 };
+
+var globMatchFactory = function globMatchFactory(globbedKeys, rootColumns){
+  return function globMatch(col) {
+    return _.reduce(globbedKeys, function(bool,rawGlobbedKey){
+      if(!bool) {
+        var globbedKey = cleanupGlob(rawGlobbedKey);
+        if(globbedKey.trim().length > 0 && col.endsWith(globbedKey)){
+          var globbedValue = rootColumns[rawGlobbedKey];
+          return globbedValue;
+        } else {
+          return false;
+        }
+      } else {
+        return bool;
+      }
+    }, false);
+  }
+}
 
 var cleanupGlob = function cleanupGlob(globbedCol){
   return globbedCol.substring(1,globbedCol.length);
@@ -156,13 +172,33 @@ var mergeKey = function mergeKey(common, key, lObj, rObj) {
 };
 
 var getExtendedTable = function getExtendedTable(tableName, rootDefs) {
-  var extendsIdx = key.indexOf(STATIC.KEYWORDS.extnds.key) + STATIC.KEYWORDS.extnds.key.length
-  var abstractTableName = key.substring(extendsIdx).trim()
-  return rootDefs.tables[abstractTableName]
+  var extendsIdx = tableName.indexOf(STATIC.KEYWORDS.extnds.key)
+  var extendsEnd = extendsIdx + STATIC.KEYWORDS.extnds.key.length
+  var abstractTableName = tableName.substring(extendsEnd).trim();
+  var rootTableItem = tableName.substring(0, extendsIdx).trim();
+  return {
+    rootName:rootTableItem,
+    abstractName:rootDefs.tables[abstractTableName]
+  };
+
 };
 
 var mergeTables = function mergeTables(tableItem, rootTableItem){
-  // nothing yet
+  var result = {};
+  console.log("MT", tableItem, rootTableItem)
+  if(_.isArray(tableItem)){
+    tableItem.forEach(function(item){
+      var abstractItem = _.remove(rootTableItem, item);
+      if(abstractItem) {
+        result[item] = abstractItem;
+      }
+    });
+  }
+  _.map(rootTableItem, function(colVal, colKey){
+    result[colKey] = colVal;
+  });
+
+  return result;
 };
 
 var parseCust = function parseCust(custJSON) {
@@ -181,15 +217,15 @@ var parseCust = function parseCust(custJSON) {
 var parseRoot = function parseRoot(rootJSON) {
   // get all the keys, parse them and sort them
   var rootKeys = Object.keys(rootJSON);
-  var tables = [];
+  var tables = {};
   var columns = {};
 
   rootKeys.forEach(function(item){
     if(hasAbstract(item) && hasTables(item)) {
-      tables.push(rootJSON[item])
+      tables = rootJSON[item];
     }
     if(hasAbstract(item) && hasColumns(item)) {
-      columns = rootJSON[item]
+      columns = rootJSON[item];
     }
   });
 
