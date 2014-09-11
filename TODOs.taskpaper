@@ -1,16 +1,25 @@
 ROADMAP
 Release 1 (command line only release, ddl and pdf/png creation for docu):
 	- Alpha 1 (basic parsing and functionality)
-		- Command Line Schema Creation in jS
+		- Command Line Schema Creation in jS @done(2014-09-10)
 			- Columns array @done(2014-09-09)
 			- Columns object @done(2014-09-09)
 			- overrides on columns @done(2014-09-09)
-			- Regex columns array fmt @today
-			- Regex columns object fmt
-			- Regex columns object fmt with override
-			- defaults (*)
+			- Regex columns array fmt @today @done(2014-09-09)
+			- Regex columns object fmt @today @done(2014-09-10)
+			- Regex columns object fmt with override @done(2014-09-10)
+			- defaults (*) @done(2014-09-10)
 		- Tables extends modifying customer
-			- Extends adding columns
+			- Extends adding columns on array no cols, overrides @today @done(2014-09-10)
+			- Extends adding columns on array with cols, no overrides
+			- Extends adding columns on array with cols, overrides
+			- Extends adding columns on object no cols, overrides
+			- Extends adding columns on object with cols, no overrides
+			- Extends adding columns on object with cols, overrides
+			- Extends adding columns on array with collliding cols, no overrides
+			- Extends adding columns on object with collliding cols, no overrides
+			- Extends adding columns on array with collliding cols, no overrides
+			- Extends adding columns on object with collliding cols, no overrides
 		- FKs
 			- FK local overrides
 			- FK defaults
@@ -19,19 +28,22 @@ Release 1 (command line only release, ddl and pdf/png creation for docu):
 			- 2 tables
 			- 3 tables with fk
 			- 4 tables with fk and composite keys
+			- Library data model
+			- Petstore data model
 		- Drawing
 			- Draw to png/pdf/html
 			- Styles
 		- Create DDL
 			- Create ddl for pg
 			- Create ddl for mysql
+			- Create ddl for hsql
 
 	- Alpha 2 (tech direction, produtcionalization)
 		- Configure Grunt/Gulp
 		- Change loggers
 		- Increase error logging/validation
-		- Migrate JS to CLJS or ScalaJS
-		- Default reference data tool csv
+		- Migrate JS to CLJS or ScalaJS (maybe?)
+		- Default reference data tool csv (or json)
 		- Yaml?
 
 	- Alpha 3 (migratino)
